@@ -5,6 +5,7 @@ import random
 import string
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from email import policy
+from email.errors import HeaderParseError
 from email.parser import BytesParser
 from typing import TypedDict
 
@@ -180,7 +181,13 @@ class CfTmpEmailAdminManager:
         # 遍历邮件的头信息
         for header in ['from', 'to', 'subject', 'date', 'message-id']:
             if header in parsed_message:
-                email_data[header] = parsed_message[header]
+                if header == 'message-id':
+                    try:
+                        email_data[header] = parsed_message[header]
+                    except HeaderParseError:
+                        email_data[header] = '[broken message-id]'
+                else:
+                    email_data[header] = parsed_message[header]
 
         email_data["contents"] = []
 
@@ -188,18 +195,18 @@ class CfTmpEmailAdminManager:
         if parsed_message.is_multipart():
             for part in parsed_message.walk():
                 if part.get_content_type() == "text/plain":
-                    email_data["contents"].append({"type": "text", "content": part.get_payload(decode=True).decode()})
+                    email_data["contents"].append({"type": "text", "content": part.get_payload(decode=True).decode(errors="ignore")})
                 elif part.get_content_type() == "text/html":
-                    email_data["contents"].append({"type": "html", "content": part.get_payload(decode=True).decode()})
+                    email_data["contents"].append({"type": "html", "content": part.get_payload(decode=True).decode(errors="ignore")})
         else:
             # 如果邮件是单一部分，直接输出内容
             content_type = parsed_message.get_content_type()
             if content_type == "text/plain":
                 email_data["contents"].append(
-                    {"type": "text", "content": parsed_message.get_payload(decode=True).decode()})
+                    {"type": "text", "content": parsed_message.get_payload(decode=True).decode(errors="ignore")})
             elif content_type == "text/html":
                 email_data["contents"].append(
-                    {"type": "html", "content": parsed_message.get_payload(decode=True).decode()})
+                    {"type": "html", "content": parsed_message.get_payload(decode=True).decode(errors="ignore")})
 
         return email_data
 
