@@ -6,6 +6,22 @@ A python tool for [cloudflare temp email](https://github.com/dreamhunter2333/clo
 
 ## 2. Document
 
+### Install
+
+Dev:
+
+```bash
+poetry add -e /path/to/cte_py
+```
+
+Prod:
+
+```bash
+poetry add /path/to/cte_py
+```
+
+### How to use
+
 按名称批量创建邮箱
 
 ```python
@@ -29,6 +45,7 @@ created_emails = cf_tmp_eo.admin_manager.create_random_email_addresses(10, "emai
 ```
 
 按 id 批量删除邮箱
+
 ```python
 cf_tmp_eo.admin_manager.delete_email_addresses([i for i in range(1, 11)])
 ```
