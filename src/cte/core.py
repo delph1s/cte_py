@@ -184,7 +184,7 @@ class CfTmpEmailAdminManager:
                 if header == 'message-id':
                     try:
                         email_data[header] = parsed_message[header]
-                    except HeaderParseError:
+                    except (HeaderParseError, IndexError):
                         email_data[header] = '[broken message-id]'
                 else:
                     email_data[header] = parsed_message[header]
